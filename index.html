@@ -83,7 +83,6 @@
   </form>
 
   <script>
-    // Google Maps Autocomplete
     function initAutocomplete() {
       const pickup = new google.maps.places.Autocomplete(
         document.getElementById('pickupLocation'),
@@ -125,16 +124,15 @@
           document.getElementById('taxiForm').reset();
           grecaptcha.reset();
         } else {
-          alert('❌ Something went wrong. Please try again.');
+          alert('❌ Booking failed: ' + (result.message || "Please try again."));
         }
-      } catch (err) {
-        console.error(err);
+      } catch (error) {
         alert('❌ Submission failed. Please try again later.');
+        console.error('Fetch error:', error);
       }
     });
   </script>
 
-  <!-- Google Maps JavaScript API -->
   <script
     src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDEVrXWKWvWD-Tmk-aorXs_Heho1kA3cks&libraries=places&callback=initAutocomplete"
     async defer></script>
