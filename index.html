@@ -1,148 +1,65 @@
+<!-- Booking Form -->
+<form class="form-container" id="taxiForm">
+  <h2>Book a Taxi</h2>
+  <label for="name">Name *</label>
+  <input type="text" id="name" name="name" required />
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Taxi Booking Form</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto&display=swap">
-  <script src="https://www.google.com/recaptcha/api.js" async defer></script>
-  <style>
-    body {
-      font-family: 'Roboto', sans-serif;
-      background: #f9f9f9;
-      padding: 20px;
-      display: flex;
-      justify-content: center;
-    }
-    .form-container {
-      background: white;
-      border-radius: 16px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      padding: 24px;
-      max-width: 500px;
-      width: 100%;
-      border-top: 6px solid #ffcc00;
-    }
-    .form-container h2 {
-      margin-top: 0;
-      color: #333;
-    }
-    label {
-      display: block;
-      margin: 12px 0 6px;
-      font-weight: 500;
-    }
-    input {
-      width: 100%;
-      padding: 10px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      font-size: 16px;
-    }
-    button {
-      margin-top: 20px;
-      background-color: #ffcc00;
-      color: #000;
-      border: none;
-      padding: 12px;
-      width: 100%;
-      font-size: 18px;
-      border-radius: 8px;
-      cursor: pointer;
-    }
-    button:hover {
-      background-color: #e6b800;
-    }
-  </style>
-</head>
-<body>
-  <form class="form-container" id="taxiForm">
-    <h2>Book a Taxi</h2>
-    <label for="name">Name *</label>
-    <input type="text" id="name" name="name" required />
+  <label for="phone">Phone (Australia only) *</label>
+  <input type="tel" id="phone" name="phone" pattern="^\+?61\s?\d{4}\s?\d{4}$|^0[2-478]\d{8}$" required placeholder="e.g. 0412345678 or +61412345678" />
 
-    <label for="phone">Phone (Australia only) *</label>
-    <input type="tel" id="phone" name="phone" pattern="^\+?61\s?\d{4}\s?\d{4}$|^0[2-478]\d{8}$" required placeholder="e.g. 0412345678 or +61412345678" />
+  <label for="pickupDateTime">Pickup Date & Time *</label>
+  <input type="datetime-local" id="pickupDateTime" name="pickupDateTime" required />
 
-    <label for="pickupDateTime">Pickup Date & Time *</label>
-    <input type="datetime-local" id="pickupDateTime" name="pickupDateTime" required />
+  <label for="pickupLocation">Pickup Location *</label>
+  <input type="text" id="pickupLocation" name="pickupLocation" required />
 
-    <label for="pickupLocation">Pickup Location *</label>
-    <input type="text" id="pickupLocation" name="pickupLocation" required />
+  <label for="dropoffLocation">Dropoff Location</label>
+  <input type="text" id="dropoffLocation" name="dropoffLocation" />
 
-    <label for="dropoffLocation">Dropoff Location</label>
-    <input type="text" id="dropoffLocation" name="dropoffLocation" />
+  <label for="email">Email (optional)</label>
+  <input type="email" id="email" name="email" />
 
-    <label for="email">Email (optional)</label>
-    <input type="email" id="email" name="email" />
+  <div class="g-recaptcha" data-sitekey="6Lcqq2IrAAAAAE-5NzRW-iyV3M-Gq71oyThTXUDq"></div>
 
-    <div class="g-recaptcha" data-sitekey="6Lcqq2IrAAAAAE-5NzRW-iyV3M-Gq71oyThTXUDq"></div>
+  <button type="submit">Submit Booking</button>
+</form>
 
-    <button type="submit">Submit Booking</button>
-  </form>
+<script>
+  document.getElementById('taxiForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
 
-  <script>
-    // Google Places Autocomplete
-    function initAutocomplete() {
-      const pickup = new google.maps.places.Autocomplete(
-        document.getElementById('pickupLocation'),
-        { types: ['geocode'] }
-      );
-      const dropoff = new google.maps.places.Autocomplete(
-        document.getElementById('dropoffLocation'),
-        { types: ['geocode'] }
-      );
+    const recaptchaToken = grecaptcha.getResponse();
+    if (!recaptchaToken) {
+      alert('Please complete the reCAPTCHA.');
+      return;
     }
 
-    document.getElementById('taxiForm').addEventListener('submit', async function(e) {
-      e.preventDefault();
+    const fd = new FormData();
+    fd.append('name', document.getElementById('name').value);
+    fd.append('phone', document.getElementById('phone').value);
+    fd.append('pickupDateTime', document.getElementById('pickupDateTime').value);
+    fd.append('pickupLocation', document.getElementById('pickupLocation').value);
+    fd.append('dropoffLocation', document.getElementById('dropoffLocation').value);
+    fd.append('email', document.getElementById('email').value);
+    fd.append('recaptcha', recaptchaToken);
 
-      const recaptchaToken = grecaptcha.getResponse();
-      if (!recaptchaToken) {
-        alert('Please complete the reCAPTCHA.');
-        return;
+    try {
+      const response = await fetch('https://script.google.com/macros/s/AKfycby46pswxPlZpboD9atysN7PKi1KCCf3jhCbOA_w-1dmMV5_imb0zQOa5S3UlIZZZdxf/exec', {
+        method: 'POST',
+        body: fd
+      });
+
+      const result = await response.json();
+      if (result.status === 'success') {
+        alert('✅ Booking confirmed!');
+        document.getElementById('taxiForm').reset();
+        grecaptcha.reset();
+      } else {
+        alert('❌ Something went wrong. Please try again.');
       }
-
-      const formData = {
-        name: document.getElementById('name').value,
-        phone: document.getElementById('phone').value,
-        pickupDateTime: document.getElementById('pickupDateTime').value,
-        pickupLocation: document.getElementById('pickupLocation').value,
-        dropoffLocation: document.getElementById('dropoffLocation').value,
-        email: document.getElementById('email').value,
-        recaptcha: recaptchaToken
-      };
-
-      try {
-        const response = await fetch('https://script.google.com/macros/s/AKfycby46pswxPlZpboD9atysN7PKi1KCCf3jhCbOA_w-1dmMV5_imb0zQOa5S3UlIZZZdxf/exec', {
-          method: 'POST',
-          body: JSON.stringify(formData),
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        });
-
-        const result = await response.json();
-        if (result.status === 'success') {
-          alert('Booking submitted successfully!');
-          document.getElementById('taxiForm').reset();
-          grecaptcha.reset();
-        } else {
-          alert('There was a problem with your submission.');
-        }
-      } catch (error) {
-        console.error(error);
-        alert('Submission failed. Please try again later.');
-      }
-    });
-  </script>
-
-  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDEVrXWKWvWD-Tmk-aorXs_Heho1kA3cks&libraries=places&callback=initAutocomplete" async defer></script>
-
-</body>
-</html>
-
-
-
+    } catch (err) {
+      console.error(err);
+      alert('❌ Submission failed. Please try again later.');
+    }
+  });
+</script>
