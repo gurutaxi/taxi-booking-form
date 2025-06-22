@@ -113,7 +113,9 @@
       fd.append('recaptcha', recaptchaToken);
 
       try {
-const response = await fetch('https://script.google.com/macros/s/AKfycbxv5dTbfRtF_MibO0qVxLHw2PjQPqF6fhuNHnfqYfkPAEKo8jQZejLeA6ALeCcqgjSX/exec', {
+const response = await
+  fetch('https://script.google.com/macros/s/AKfycbxv5dTbfRtF_MibO0qVxLHw2PjQPqF6fhuNHnfqYfkPAEKo8jQZejLeA6ALeCcqgjSX/exec', {
+ {
           method: 'POST',
           body: fd
         });
